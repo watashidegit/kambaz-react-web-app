@@ -305,7 +305,7 @@ export default function Lab1() {
                 <a href="https://www.lipsum.com" id="wd-lipsum"> click here </a>
                 to get dummy text<br />
                 Please
-                <a href="https://www.lipsum.com" id="wd-github"> click here </a>
+                <a href="https://github.com/watashidegit/kambaz-react-web-app.git" id="wd-github"> click here </a>
                 to go to Yongru Wang's github<br />
             </div>
 
