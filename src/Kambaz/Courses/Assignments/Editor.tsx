@@ -3,7 +3,7 @@ export default function AssignmentEditor() {
         <div id="wd-assignments-editor">
             <label htmlFor="wd-name">Assignment Name</label>
             <input id="wd-name" value="A1 - ENV + HTML" /><br /><br />
-            <textarea id="wd-description" cols={50} rows={10}>
+            <textarea id="wd-description" cols={50} rows={7}>
                 The assignment is available online Submit a link to the landing page of
                 your Web application running on Netlify. The landing page should include 
                 the following: Your full name and section Links to each of the lab 
@@ -12,6 +12,7 @@ export default function AssignmentEditor() {
                 back to the landing page.
             </textarea>
             <br />
+            <br></br>
             <table>
                 <tr>
                     <td align="right" valign="middle">
@@ -47,7 +48,7 @@ export default function AssignmentEditor() {
                 </tr>
                 <br></br>
                 <tr>
-                    <td align="right" valign="middle">
+                    <td align="right" valign="top">
                         <label htmlFor="wd-submission-type">Submission Type</label>
                     </td>
                     <td>
@@ -55,14 +56,9 @@ export default function AssignmentEditor() {
                         <option value="VAL1" selected>Online</option>
                         <option value="VAL2" >In person</option>
                     </select>
-                    </td>
-                </tr>
-                <br></br>
-                <tr>
-                    <td align="right" valign="middle">
-                        <label>Online Entry Options</label>
-                    </td>
-                    <td>
+                    <br />
+                    <br></br>
+                        <label>Online Entry Options</label> <br/>
                         <input type="checkbox" id="wd-text-entry"/>
                         <label htmlFor="wd-text-entry">Text Entry</label><br />
 
@@ -90,19 +86,31 @@ export default function AssignmentEditor() {
                         <input id="wd-assign-to" value={"Everyone"} /><br />
                         <br></br>
                         <label htmlFor="wd-due-date">Due</label><br />
-                        <input id="wd-due-date" type="date" value="2000-01-21" /><br />
+                        <input id="wd-due-date" type="date" value="2024-05-13" /><br />
                         <br></br>
-                        <label htmlFor="wd-available-from">Available from</label><br />
-                        <input id="wd-available-from" type="date" value="2000-01-21"  /><br />
-                        <label htmlFor="wd-available-until">Until</label><br />
-                        <input id="wd-available-until" type="date" value="2000-01-21"  />
-                        
+                        <td>
+                            <label htmlFor="wd-available-from">Available from</label><br />
+                            <input id="wd-available-from" type="date" value="2024-05-06"  /><br />
+                        </td>
+                        <td>
+                            <label htmlFor="wd-available-until">Until</label><br />
+                            <input id="wd-available-until" type="date" value="2024-05-20"  />
+                        </td>
+                    </td>
+                    <br></br>
+                </tr>
+
+            </table>
+            <hr />
+            <table>
+                <tr>
+                <br></br>
+                    <td align="right" valign="bottom">
+                        <button>Cancel</button>
+                        <button>Save</button>
                     </td>
                 </tr>
             </table>
-            <hr />
-            <button>Cancel</button>
-            <button>Save</button>
         </div>
     );
 }
