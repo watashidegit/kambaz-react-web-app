@@ -1,15 +1,26 @@
 import { Form, Button, Card, Row, Col, InputGroup } from "react-bootstrap";
 import { FaCalendarAlt } from "react-icons/fa";
+import { useParams, Link } from "react-router-dom";
+import * as db from "../../Database";
+
 export default function AssignmentEditor() {
+    const { cid, aid } = useParams();
+    const assignment = db.assignments.find((a:any) => a._id === aid);
+    
+    if (!assignment) {
+        return <h3 className="text-center text-danger">Assignment not found.</h3>
+    }
+
     return (
         <div style={{ width:"700px", margin: "0 auto" }} id="wd-assignments-editor">
             <div className="container mt-4">
                 <Form>
                     <Form.Group className="mb-3">
                         <Form.Label>Assignment Name</Form.Label>
-                        <Form.Control type="text" placeholder="A1" />
+                        <Form.Control type="text" defaultValue={assignment.title} />
                     </Form.Group>
 
+                    {/* Assignment Description */}
                     <Card id="wd-description" className="mb-4">
                         <Card.Body>
                             <p>
@@ -71,6 +82,7 @@ export default function AssignmentEditor() {
                     </Card>
                     </Form.Label>
 
+                    {/* Availability and Due Date */}
                     <Card className="mb-4">
                         <Card.Body>
                             <Form.Group className="mb-3">
@@ -85,7 +97,7 @@ export default function AssignmentEditor() {
                                         <InputGroup>
                                             <Form.Control
                                                 type="datetime-local"
-                                                defaultValue="2024-05-13T23:59"
+                                                defaultValue={"2024-05-13T23:59"}
                                                 aria-label="Due Date"
                                             />
                                             <InputGroup.Text>

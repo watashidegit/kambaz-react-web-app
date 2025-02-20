@@ -1,5 +1,6 @@
 import { FaPlus, FaSearch } from "react-icons/fa";
 import { Button, FormControl, InputGroup } from "react-bootstrap";
+
 export default function AssignmentsControls() {
  return (
    <div id="wd-assignments-controls" className="d-flex align-items-center justify-content-between mb-4 ">
