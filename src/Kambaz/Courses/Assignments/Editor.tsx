@@ -1,6 +1,6 @@
-import { Form, Button, Card, Row, Col, InputGroup } from "react-bootstrap";
+import { Form, Card, Row, Col, InputGroup } from "react-bootstrap";
 import { FaCalendarAlt } from "react-icons/fa";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link  } from "react-router-dom";
 import * as db from "../../Database";
 
 export default function AssignmentEditor() {
@@ -143,11 +143,12 @@ export default function AssignmentEditor() {
                         </Card.Body>
                     </Card>
 
+                    {/* Save & Cancel Buttons */}
                     <div className="d-flex justify-content-end">
-                        <Button variant="secondary" className="me-2">
-                            Cancel
-                        </Button>
-                        <Button variant="danger">Save</Button>
+                        <Link to={`/Kambaz/Courses/${cid}/Assignments`} className="btn btn-secondary me-2">
+                        Cancel</Link>
+                        <Link to={`/Kambaz/Courses/${cid}/Assignments`} className="btn btn-danger">
+                        Save</Link>
                     </div>
                 </Form>
             </div>  

@@ -1,7 +1,6 @@
 import ModulesControls from "./ModulesControls";
 import ModuleControlButtons from "./ModuleControlButtons";
 import "../../styles.css";
-import { ListGroup } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";
 import { useParams } from "react-router";
 import * as db from "../../Database";
