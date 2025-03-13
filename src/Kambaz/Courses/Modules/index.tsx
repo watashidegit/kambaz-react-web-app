@@ -30,6 +30,14 @@ export default function Modules({ modules: propModules, setModules }: ModulesPro
           <ModulesControls setModuleName={setModuleName} moduleName={moduleName} 
           addModule={() => {
             dispatch(addModule({ name: moduleName, course: cid }));
+            if (setModules && propModules) {
+              const newModule = {
+                  _id: Date.now().toString(),
+                  name: moduleName,
+                  course: cid || ""
+              };
+              setModules([...propModules, newModule]);
+            }
             setModuleName("");
         }}/>}
         <br /><br /><br /><br />
