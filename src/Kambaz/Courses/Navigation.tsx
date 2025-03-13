@@ -3,7 +3,7 @@ import "../styles.css";
 export default function CourseNavigation() {
   const { pathname } = useLocation() 
   const { cid } = useParams();
-  const links = ["Home", "Modules", "Piazza", "Zoom", "Assignments", "Quizzes", "Grades", "People"];
+  const links = ["Home", "Modules", "Pazza", "Zoom", "Assignments", "Quizzes", "Grades", "People"];
   return (
     <div id="wd-courses-navigation" className="wd list-group fs-5 rounded-0">
       {links.map((link) => {
