@@ -1,16 +1,21 @@
-import Pazza from "./Pazza";
+//import Pazza from "./Pazza";
 import CourseNavigation from "./Navigation";
-import { Navigate, Route, Routes, useParams, useLocation } from "react-router";
+import { Route, Routes, useParams, useLocation } from "react-router";
 import Modules from "./Modules";
 import Home from "./Home";
 import Assignments from "./Assignments";
 import AssignmentEditor from "./Assignments/Editor";
 import People from "./People/Table";
 import { FaAlignJustify } from "react-icons/fa";
+import { useState } from "react";
+import * as db from "../Database";
+
 export default function Courses( { courses }: { courses: any[]}) {
+    
     const { cid } = useParams();
     const course = courses.find((course) => course._id === cid);
     const { pathname } = useLocation();
+    const [modules, setModules] = useState<any[]>(db.modules);
     return (
       <div id="wd-courses">        
         <h2 className="text-danger">
@@ -22,18 +27,23 @@ export default function Courses( { courses }: { courses: any[]}) {
             <CourseNavigation />
           </div>
           <div className="flex-fill">
-            <Routes>
-              <Route path="/" element={<Navigate to="Home" />} />
-              <Route path="Home" element={<Home />} />
-                    <Route path="Modules" element={<Modules />} />
-                    <Route path="Pazza" element={<Pazza />} />
-                    <Route path="Zoom" element={<h2>Zoom</h2>} />
-                    <Route path="Assignments" element={<Assignments />} />
-                    <Route path="Assignments/:aid" element={<AssignmentEditor />} />
-                    <Route path="Quizzes" element={<h2>Quizzes</h2>} />
-                    <Route path="Grades" element={<h2>Grades</h2>} />
-                    <Route path="People" element={<People />} />
-                    </Routes>
+          <Routes>
+              <Route path="Home" element={
+                  <Home
+                      modules={modules}
+                      setModules={setModules}
+                  />
+              } />
+              <Route path="Modules" element={
+                  <Modules
+                      modules={modules}
+                      setModules={setModules}
+                  />
+              } />
+              <Route path="Assignments" element={<Assignments />} />
+              <Route path="Assignments/:aid" element={<AssignmentEditor />} />
+              <Route path="People" element={<People />} />
+            </Routes>
           </div>
         </div>
       </div>

@@ -9,11 +9,18 @@ import { useParams } from "react-router";
 import { useState } from "react";
 import LessonControlButtons from "./LessonControlButtons";
 import { FormControl } from "react-bootstrap";
+import { ModuleType } from "./types";
 
-export default function Modules() {
+interface ModulesProps {
+  modules?: ModuleType[];
+  setModules?: (modules: ModuleType[]) => void;
+}
+
+export default function Modules({ modules: propModules, setModules }: ModulesProps = {}) {
     const { cid } = useParams();
     const [moduleName, setModuleName] = useState("");
-    const { modules } = useSelector((state: any) => state.modulesReducer);
+    const { modules: reduxModules } = useSelector((state: any) => state.modulesReducer);
+    const modulesToUse = propModules || reduxModules;
     const dispatch = useDispatch();
     const { currentUser } = useSelector((state: any) => state.accountReducer);
     return (
@@ -27,7 +34,7 @@ export default function Modules() {
         }}/>}
         <br /><br /><br /><br />
         <ul id="wd-modules" className="list-group rounded-0">
-        {modules
+        {modulesToUse
           .filter((module: any) => module.course === cid)
           .map((module: any) => (
           <li className="wd-module list-group-item p-0 mb-5 fs-5 border-gray">
