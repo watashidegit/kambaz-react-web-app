@@ -1,85 +1,26 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import * as client from "./client";
 import { useDispatch } from "react-redux";
 import { setCurrentUser } from "./reducer";
-import * as db from "../Database";
-import { Form, Button, Container } from "react-bootstrap";
-import { UserType } from "./types";
-
+import { FormControl } from "react-bootstrap";
 export default function Signup() {
-    const [newUser, setNewUser] = useState({
-        username: "",
-        password: "",
-    });
-
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-
-    const signup = () => {
-        if (!newUser.username || !newUser.password) {
-            alert("Please enter both username and password.");
-            return;
-        }
-
-        const existingUser = db.users.find((u: UserType) => u.username === newUser.username);
-        if (existingUser) {
-            alert("Username already exists. Please choose another one.");
-            return;
-        }
-
-        const user: UserType = {
-            _id: Date.now().toString(),
-            username: newUser.username,
-            password: newUser.password,
-            firstName: "",
-            lastName: "",
-            email: "",
-            dob: "",
-            role: "STUDENT",
-            loginId: Date.now().toString(), // Or any default value
-            section: "",
-            lastActivity: new Date().toISOString(),
-            totalActivity: "0"
-        };
-
-        db.users.push(user);
-        dispatch(setCurrentUser(user));
-        navigate("/Kambaz/Dashboard");
-    };
-
-    return (
-        <Container className="d-flex justify-content-center mt-5">
-            <div className="w-25">
-                <h2 className="text-center">Signup</h2>
-                <Form>
-                    <Form.Group className="mb-3">
-                        <Form.Control
-                            type="text"
-                            placeholder="Username"
-                            value={newUser.username}
-                            onChange={(e) =>
-                                setNewUser((prev) => ({ ...prev, username: e.target.value }))
-                            }
-                        />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Control
-                            type="password"
-                            placeholder="Password"
-                            value={newUser.password}
-                            onChange={(e) =>
-                                setNewUser((prev) => ({ ...prev, password: e.target.value }))
-                            }
-                        />
-                    </Form.Group>
-                    <Button variant="primary" className="w-100" onClick={signup}>
-                        Sign up
-                    </Button>
-                </Form>
-                <div className="mt-3 text-center">
-                    <Link to="/Kambaz/Account/Signin">Already have an account? Sign in</Link>
-                </div>
-            </div>
-        </Container>
-    );
-}
+  const [user, setUser] = useState<any>({});
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const signup = async () => {
+    const currentUser = await client.signup(user);
+    dispatch(setCurrentUser(currentUser));
+    navigate("/Kambaz/Account/Profile");
+  };
+  return (
+    <div className="wd-signup-screen">
+      <h1>Sign up</h1>
+      <FormControl value={user.username} onChange={(e) => setUser({ ...user, username: e.target.value })}
+             className="wd-username b-2" placeholder="username" />
+      <FormControl value={user.password} onChange={(e) => setUser({ ...user, password: e.target.value })}
+             className="wd-password mb-2" placeholder="password" type="password"/>
+      <button onClick={signup} className="wd-signup-btn btn btn-primary mb-2 w-100"> Sign up </button><br />
+      <Link to="/Kambaz/Account/Signin" className="wd-signin-link">Sign in</Link>
+    </div>
+);}

@@ -3,25 +3,39 @@ import { useSelector, useDispatch } from "react-redux";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import { addAssignment, updateAssignment } from "./reducer";
-import { AssignmentType } from "./types";
+import * as courseClient from "../client"; 
+import * as assignmentClient from "./client";
 
 export default function AssignmentEditor() {
     const { cid, aid } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const assignments: AssignmentType[] = useSelector(
-        (state: { assignmentReducer: { assignments: AssignmentType[] } }) =>
-            state.assignmentReducer.assignments
-    );
+    // extract assignments of the course from redux
+    const assignments = useSelector((state: any) => state.assignmentReducer.assignments);
 
-    const existingAssignment = assignments.find(a => a._id === aid);
+    // check if the assignment exist, go to add/edit mode
+    const assignment = assignments.find((assignment: any) => assignment._id === aid);
 
     const { currentUser } = useSelector((state: any) => state.accountReducer);
 
+    // create assignment for the course
+    const createAssignmentForCourse = async () => {
+        if (!cid) return;
+        const newAssignment = { title: formData.title, course: cid}
+        const assignment = await courseClient.createAssignmentForCourse(cid, newAssignment);
+        dispatch(addAssignment(assignment));
+    }
 
+    // save update
+    const saveAssignmentUpdate = async (assignment: any) => {
+        await assignmentClient.updateAssignment(assignment);
+        dispatch(updateAssignment(assignment));
+    }
 
+    // initial state of the form (form to create new assignment)
     const [formData, setFormData] = useState({
+        _id: "",
         title: "",
         description: "",
         points: 100,
@@ -35,21 +49,22 @@ export default function AssignmentEditor() {
     });
 
     useEffect(() => {
-        if (existingAssignment) {
+        if (assignment) {
             setFormData({
-                title: existingAssignment.title || "",
-                description: existingAssignment.description ?? `This is the description for ${existingAssignment.title}`,
-                points: existingAssignment.points || 100,
-                assignmentGroup: existingAssignment.assignmentGroup || "ASSIGNMENTS",
-                displayGrade: existingAssignment.displayGrade || "Percentage",
-                submissionType: existingAssignment.submissionType || "Online",
-                assignTo: existingAssignment.assignTo || "Everyone",
-                dueDate: existingAssignment.dueDate || "",
-                availableFromDate: existingAssignment.availableFromDate || "",
-                availableUntilDate: existingAssignment.availableUntilDate || "",
+                _id: assignment._id || "",
+                title: assignment.title || "",
+                description: assignment.description ?? `This is the description for ${assignment.title}`,
+                points: assignment.points || 100,
+                assignmentGroup: assignment.assignmentGroup || "ASSIGNMENTS",
+                displayGrade: assignment.displayGrade || "Percentage",
+                submissionType: assignment.submissionType || "Online",
+                assignTo: assignment.assignTo || "Everyone",
+                dueDate: assignment.dueDate || "",
+                availableFromDate: assignment.availableFromDate || "",
+                availableUntilDate: assignment.availableUntilDate || "",
             });
         }
-    }, [existingAssignment]);
+    }, [assignment]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -58,7 +73,7 @@ export default function AssignmentEditor() {
 
     const handleSave = () => {
         const updatedAssignment = {
-            _id: existingAssignment ? existingAssignment._id : Math.random().toString(36).substr(2, 9),
+            _id: assignment?._id,
             title: formData.title,
             course: cid,
             description: formData.description,
@@ -72,10 +87,10 @@ export default function AssignmentEditor() {
             assignTo: formData.assignTo,
         };
 
-        if (existingAssignment) {
-            dispatch(updateAssignment(updatedAssignment));
+        if (assignment) {
+            saveAssignmentUpdate(updatedAssignment);
         } else {
-            dispatch(addAssignment(updatedAssignment));
+            createAssignmentForCourse();
         }
         navigate(`/Kambaz/Courses/${cid}/Assignments`);
     };

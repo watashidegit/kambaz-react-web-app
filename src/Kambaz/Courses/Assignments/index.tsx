@@ -6,38 +6,55 @@ import GreenCheckmark from "../Modules/GreenCheckmark";
 import AssignmentIcon from "./AssignmentIcon";
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import { deleteAssignment } from "./reducer";
-import { useState } from "react";
-import { AssignmentType } from "./types";
+import { deleteAssignment, setAssignments } from "./reducer";
+import { useEffect, useState } from "react";
+import * as courseClient from "../client";
+import * as assignmentClient from "./client";
 
 export default function Assignments() {
     const { cid } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    
 
-    const assignments: AssignmentType[] = useSelector(
-        (state: { assignmentReducer: { assignments: AssignmentType[] } }) =>
-            state.assignmentReducer.assignments
-    );
+    // delete assignment with aid
+    const removeAssignment = async (assignmentId: string) => {
+        await assignmentClient.deleteAssignment(assignmentId);
+        dispatch(deleteAssignment(assignmentId));
+    }
 
-    const courseAssignments = assignments.filter((a: AssignmentType) => a.course === cid);
+    // fetch assignments of the course and dispatch to redux
+    const fetchAssignments = async () => {
+        const assignments = await courseClient.findAssignmentsForCourse(cid as string);
+        dispatch(setAssignments(assignments));
+    }
+    
+    // load assignments
+    useEffect(() => {
+        fetchAssignments();
+    }, []);
 
-    const { currentUser } = useSelector(
-        (state: { accountReducer: { currentUser: { role: string } | null } }) =>
-            state.accountReducer
-    );
+    // extract assignments from redux
+    const assignments = useSelector((state: any) => state.assignmentReducer.assignments);
 
-    const [selectedAssignment, setSelectedAssignment] = useState<AssignmentType | null>(null);
+    // extract from redux to determine user roles
+    const { currentUser } = useSelector((state: any) => state.accountReducer);
+    const isFaculty = currentUser?.role === "FACULTY";
+
+    // select assignment for removal
+    const [selectedAssignment, setSelectedAssignment] = useState< any | null>(null);
+
+    // state variable to pop delete modal
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-    const handleDeleteClick = (assignment: AssignmentType) => {
+    const handleDeleteClick = (assignment: any) => {
         setSelectedAssignment(assignment);
         setShowDeleteModal(true);
     };
 
     const handleConfirmDelete = () => {
         if (selectedAssignment) {
-            dispatch(deleteAssignment(selectedAssignment._id));
+            removeAssignment(selectedAssignment._id)
         }
         setShowDeleteModal(false);
         setSelectedAssignment(null);
@@ -67,7 +84,8 @@ export default function Assignments() {
                     <Form.Control placeholder="Search for Assignments" className="border-start-0" />
                 </InputGroup>
 
-                {currentUser?.role === "FACULTY" && (
+                {/* Faculty Only Adding section */}
+                {isFaculty && (
                     <div>
                         <Button variant="secondary" className="me-2">
                             <FaPlus className="me-2 mb-1" />
@@ -92,13 +110,13 @@ export default function Assignments() {
                     </div>
                     <div className="d-flex align-items-center">
                         <span className="text-secondary me-3">40% of Total</span>
-                        {currentUser?.role === "FACULTY" && <FaPlus className="me-3" />}
+                        {isFaculty && <FaPlus className="me-3" />}
                         <BsThreeDotsVertical />
                     </div>
                 </ListGroup.Item>
 
                 <ListGroup className="rounded-0">
-                    {courseAssignments.map((assignment) => (
+                    {assignments.map((assignment: any) => (
                         <ListGroup.Item key={assignment._id} className="wd-lesson p-3 ps-3 border-bottom">
                             <div className="d-flex align-items-start w-100">
                                 <BsGripVertical className="me-2 fs-3" />
@@ -121,7 +139,8 @@ export default function Assignments() {
                                 </div>
                                 <div className="d-flex align-items-center">
                                     <GreenCheckmark />
-                                    {currentUser?.role === "FACULTY" && (
+                                    {/* Faculty handle delete */}
+                                    {isFaculty && (
                                         <>
                                             <Button
                                                 variant="link"

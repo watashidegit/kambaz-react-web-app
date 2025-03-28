@@ -1,8 +1,8 @@
+import * as client from "./client";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { setCurrentUser } from "./reducer";
 import { useDispatch } from "react-redux";
-import * as db from "../Database";
 import { FormControl, Button } from "react-bootstrap";
 
 export default function Signin() {
@@ -11,8 +11,9 @@ export default function Signin() {
   const navigate = useNavigate();
 
   const signin = () => {
-    const user = db.users.find(
-      (u: any) => u.username === credentials.username && u.password === credentials.password);
+    const user = async() => {
+      const user = await client.signin(credentials);
+    }
     if (!user) return;
     dispatch(setCurrentUser(user));
     navigate("/Kambaz/Dashboard");

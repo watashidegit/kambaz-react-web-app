@@ -1,10 +1,10 @@
 import Modules from "../Modules";
 import CourseStatus from "./Status";
-export default function Home({ modules, setModules }: { modules: any[]; setModules: (modules: any[]) => void }) {
+export default function Home() {
   return (
       <div className="d-flex" id="wd-home">
           <div className="flex-fill me-3">
-              <Modules modules={modules} setModules={setModules} />
+              <Modules />
           </div>
           <div className="d-none d-xl-block">
               <CourseStatus />
