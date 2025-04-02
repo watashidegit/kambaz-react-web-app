@@ -38,6 +38,28 @@ export const findMyCourses = async () => {
 export const createCourse = async (course: any) => {
     const { data } = await axiosWithCredentials.post(`${USERS_API}/current/courses`, course);
     return data;
-  };
+};
   
+// enroll a new course (user end)
+export const enrollCourse = async (courseId: string) => {
+  const url = `${USERS_API}/current/enrollments`;
+
+  console.log("📡 POST Request to:", url);
+  console.log("📦 Request body:", { courseId });
+
+  const response = await axiosWithCredentials.post(url, { courseId });
+  return response;
+};
+
+// unenroll a course (user end)
+export const unenrollCourse = async (courseId: string) => {
+  const url = `${USERS_API}/current/enrollments`;
+  const data = { courseId };
+
+  console.log("📡 Delete Request to:", url);
+  console.log("📦 Request body:", data);
+
+  const response = await axiosWithCredentials.delete(url, {data});
+  return response;
+}
   

@@ -7,8 +7,6 @@ import Assignments from "./Assignments";
 import AssignmentEditor from "./Assignments/Editor";
 import People from "./People/Table";
 import { FaAlignJustify } from "react-icons/fa";
-import { useState } from "react";
-import * as db from "../Database";
 
 export default function Courses( { courses }: { courses: any[]}) {
     
