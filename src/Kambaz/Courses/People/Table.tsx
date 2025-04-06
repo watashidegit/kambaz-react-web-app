@@ -1,40 +1,26 @@
 import { Table } from "react-bootstrap";
 import { FaUserCircle } from "react-icons/fa";
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import * as peopleClient from "./client"; 
+import PeopleDetails from "./Details";
+import { Link } from "react-router-dom";
 
-export default function PeopleTable() {
-  const { cid } = useParams();
-  const [courseUsers, setCourseUsers] = useState<any[]>([]);
-
-  const fetchUsers = async (cid: string) => {
-    try {
-      const users = await peopleClient.fetchUsersInCourse(cid);
-      console.log("fetched users", users);
-      setCourseUsers(users);
-    } catch (error) {
-      console.error("Error fetching users for course:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (cid) fetchUsers(cid);
-  }, [cid]);
+export default function PeopleTable({ users = [] }: { users?: any[] }) {
 
  return (
   <div id="wd-people-table">
+   <PeopleDetails />
    <Table striped>
     <thead>
      <tr><th>Name</th><th>Login ID</th><th>Section</th><th>Role</th><th>Last Activity</th><th>Total Activity</th></tr>
     </thead>
     <tbody>
-        {courseUsers.map((user: any) => (
+        {users.map((user: any) => (
             <tr key={user._id}>
               <td className="wd-full-name text-nowrap">
-                <FaUserCircle className="me-2 fs-1 text-secondary" />
-                <span className="wd-first-name">{user.firstName}</span>
-                <span className="wd-last-name">{user.lastName}</span>
+                <Link to={`/Kambaz/Account/Users/${user._id}`} className="text-decoration-none">
+                  <FaUserCircle className="me-2 fs-1 text-secondary" />
+                  <span className="wd-first-name">{user.firstName}</span>
+                  <span className="wd-last-name">{user.lastName}</span>
+                </Link>
               </td>
               <td className="wd-login-id">{user.loginId}</td>
               <td className="wd-section">{user.section}</td>
