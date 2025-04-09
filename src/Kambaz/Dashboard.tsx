@@ -1,13 +1,12 @@
 import { FormControl } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { useEffect, useState } from "react";
-import * as courseClient from "./Courses/client";
 
 interface Course {
   _id: string;
   name: string;
   description: string;
+  enrolled: boolean;
 }
 
 export default function Dashboard(
@@ -27,30 +26,10 @@ export default function Dashboard(
   // Extract current user from Redux store
   const { currentUser } = useSelector((state: any) => state.accountReducer);
 
-  const [courseList, setCourseList] = useState<any[]>([]);
-
-  // const [refreshTrigger, setRefreshTrigger] = useState(0);
-
-  // fetch an offered course list
-  const fetchCourseList = async () => {
-    try {
-        const courses = await courseClient.fetchAllCourses(); // call the function
-        setCourseList(courses); // store in state
-      } catch (error) {
-        console.error("Error fetching courses:", error);
-      }
-  }
-
-  useEffect(() => {
-    fetchCourseList();
-  }, []);
-
-  // Local state for controlling course visibility
-  //const [showAllCourses, setShowAllCourses] = useState(false);
-
   // Determine the user's role
   //const isStudent = currentUser?.role === "STUDENT";
-  const isFaculty = currentUser?.role === "FACULTY";
+  //const isFaculty = currentUser?.role === "FACULTY";
+  const isEditable = currentUser?.role === "FACULTY" || currentUser?.role === "ADMIN";
 
   return (
     <div className="p-4" id="wd-dashboard">
@@ -62,7 +41,7 @@ export default function Dashboard(
       </h1>
       <hr />
 
-      {isFaculty && (
+      {isEditable && (
         <div>
           <h5>
             New Course
@@ -86,15 +65,15 @@ export default function Dashboard(
 
       <hr />
       <h2 id="wd-dashboard-published">
-        {showAllCourses ? "All Courses" : "My Courses"} ({showAllCourses ? courseList.length : courses.length})
+        {showAllCourses ? "All Courses" : "My Courses"} ({showAllCourses ? courses.length : courses.length})
       </h2>
       <hr />
 
-      {(showAllCourses ? courseList : courses).length === 0 ? (
+      {(showAllCourses ? courses : courses).length === 0 ? (
         <h3 className="text-danger">No Courses Available</h3>
       ) : (
         <div className="row row-cols-1 row-cols-md-5 g-4">
-          {(showAllCourses ? courseList : courses).map((course) => (
+          {(showAllCourses ? courses : courses).map((course) => (
             <div key={course._id} className="col" style={{ width: "350px" }}>
               <div className="card">
                 <Link to={`/Kambaz/Courses/${course._id}/Home`} className="text-decoration-none text-dark">
@@ -130,8 +109,8 @@ export default function Dashboard(
                         </button>
                     )}
 
-                    {/* Faculty controls on my courses only*/}
-                    {!showAllCourses && isFaculty && (
+                    {/* Control Panel for Faculty and Admin */}
+                    {!showAllCourses && isEditable && (
                       <div className="float-end">
                         <button
                         onClick={(event) => {

@@ -9,7 +9,7 @@ export default function Users() {
 
     const [users, setUsers] = useState<any[]>([]);
     const [role, setRole] = useState("");
-    const [name, setName] = useState("");
+    const [ ,setName] = useState("");
     const { uid } = useParams();
 
     const createUser = async () => {

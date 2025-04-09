@@ -18,6 +18,11 @@ export default function Kambaz() {
     startDate: "2023-09-10", endDate: "2023-12-15", description: "New Description",
   });
   const [showAllCourses, setShowAllCourses] = useState<boolean>(false); // a toggle bw view all courses(true)/ view my courses(false)
+  const defaultCourse = {
+    _id: "",
+    name: "",
+    description: ""
+  };
 
   // fetch the courses a user is enrolled in
   const findCoursesForUser = async () => {
@@ -76,6 +81,7 @@ export default function Kambaz() {
         }
       })
     );
+    setCourse(defaultCourse); // clear input after edit successfully
   };
 
   // enrolls or unenrolls based on the enrolled flag, also updates the corresponding crs's enrolled status
