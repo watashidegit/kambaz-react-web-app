@@ -4,6 +4,10 @@ import PeopleDetails from "./Details";
 import { Link } from "react-router-dom";
 
 export default function PeopleTable({ users = [] }: { users?: any[] }) {
+  if (!Array.isArray(users)) {
+    console.error("Expected `users` to be an array but got:", users);
+    return <div>Error loading users</div>;
+  }
 
  return (
   <div id="wd-people-table">

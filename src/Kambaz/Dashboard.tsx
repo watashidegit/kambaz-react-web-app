@@ -1,8 +1,7 @@
 import { FormControl } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { enrollCourseR, unenrollCourseR } from "./Account/Enrollments/reducer";
 import * as courseClient from "./Courses/client";
 
 interface Course {
@@ -12,7 +11,7 @@ interface Course {
 }
 
 export default function Dashboard(
-  { courses, course, setCourse, addNewCourse, deleteCourse, updateCourse, enrollCourse, unenrollCourse }: 
+  { courses, course, setCourse, addNewCourse, deleteCourse, updateCourse, showAllCourses, setShowAllCourses, updateEnrollment }: 
   {
     courses: Course[]; 
     course: Course; 
@@ -20,15 +19,13 @@ export default function Dashboard(
     addNewCourse: () => void; 
     deleteCourse: (courseId: string) => void;
     updateCourse: () => void; 
-    enrollCourse: (courseId: string) => void;
-    unenrollCourse: (courseId: string) => void;
-  }
-) {
+    showAllCourses: boolean; 
+    setShowAllCourses: (showAllCourses: boolean) => void;
+    updateEnrollment: (courseId: string, enrolled: boolean) => void;
+  }) {
   
   // Extract current user from Redux store
   const { currentUser } = useSelector((state: any) => state.accountReducer);
-
-  const dispatch = useDispatch();
 
   const [courseList, setCourseList] = useState<any[]>([]);
 
@@ -49,40 +46,21 @@ export default function Dashboard(
   }, []);
 
   // Local state for controlling course visibility
-  const [showAllCourses, setShowAllCourses] = useState(false);
+  //const [showAllCourses, setShowAllCourses] = useState(false);
 
   // Determine the user's role
-  const isStudent = currentUser?.role === "STUDENT";
+  //const isStudent = currentUser?.role === "STUDENT";
   const isFaculty = currentUser?.role === "FACULTY";
 
-  // Enroll user in a course
-  const handleEnrollCourse = async (courseId: string) => {
-    if (!currentUser) return;
-    await enrollCourse(courseId);
-    dispatch(enrollCourseR({ courseId, userId: currentUser._id }));
-  };
-
-  // Unenroll from a course
-  const handleUnenrollCourse = async (courseId: string) => {
-    if (!currentUser) return;
-    console.log(courseId);
-    await unenrollCourse(courseId);
-    dispatch(unenrollCourseR( { courseId, userId: currentUser._id }));
-  };
-  
   return (
     <div className="p-4" id="wd-dashboard">
-      <h1 id="wd-dashboard-title">Dashboard</h1>
-      <hr />
-
-      {isStudent && (
-        <button
-          className="btn btn-primary float-end"
-          onClick={() => setShowAllCourses(!showAllCourses)}
-        >
-          {showAllCourses ? "Show My Courses" : "Enrollments"}
+      <h1 id="wd-dashboard-title">
+        Dashboard
+        <button onClick={() => setShowAllCourses(!showAllCourses)} className="float-end btn btn-primary" >
+          {showAllCourses ? "My Courses" : "All Courses"}
         </button>
-      )}
+      </h1>
+      <hr />
 
       {isFaculty && (
         <div>
@@ -125,9 +103,9 @@ export default function Dashboard(
 
                 <div className="card-body">
                     <h5 className="card-title text-nowrap overflow-hidden">
-                    <Link to={`/Kambaz/Courses/${course._id}/Home`} className="text-decoration-none text-dark">
-                        {course.name}
-                    </Link>
+                      <Link to={`/Kambaz/Courses/${course._id}/Home`} className="text-decoration-none text-dark">
+                          {course.name}
+                      </Link>
                     </h5>
 
                     <p className="card-text overflow-hidden" style={{ height: "100px" }}>
@@ -141,8 +119,19 @@ export default function Dashboard(
                       </Link>
                     )}
 
-                    {/* Faculty controls */}
-                    {isFaculty && (
+                    {/* enroll button */}
+                    {showAllCourses && (
+                        <button onClick={(event) => {
+                                  event.preventDefault();
+                                  updateEnrollment(course._id, !course.enrolled);
+                                }}
+                                className={`btn ${ course.enrolled ? "btn-danger" : "btn-success" } float-end`} >
+                          {course.enrolled ? "Unenroll" : "Enroll"}
+                        </button>
+                    )}
+
+                    {/* Faculty controls on my courses only*/}
+                    {!showAllCourses && isFaculty && (
                       <div className="float-end">
                         <button
                         onClick={(event) => {
@@ -162,34 +151,6 @@ export default function Dashboard(
                         >
                         Delete
                         </button>
-                      </div>
-                    )}
-
-                    {/* Student enroll/unenroll buttons */}
-                    {isStudent && showAllCourses && (
-                      <div className="mt-2">
-                        {courses.some((enrolled: any) => enrolled._id === course._id) ? (
-                        <button
-                            onClick={() => {
-                            //e.preventDefault();
-                            handleUnenrollCourse(course._id);
-                            }}
-                            className="btn btn-danger"
-                        >
-                            Unenroll
-                        </button>
-                        ) : (
-                        <button
-                            onClick={() => {
-                            //e.preventDefault(); 
-                            console.log("handle course._id:", course._id);
-                            handleEnrollCourse(course._id);
-                            }}
-                            className="btn btn-success"
-                        >
-                            Enroll
-                        </button>
-                        )}
                       </div>
                     )}
 

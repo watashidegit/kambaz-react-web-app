@@ -46,6 +46,12 @@ export const createUser = async (user: any) => {
   return response.data;
 };
 
+// find courses for signed in user
+export const findCoursesForUser = async (userId: string) => {
+  const response = await axiosWithCredentials.get(`${USERS_API}/${userId}/courses`);
+  return response.data;
+};
+
 export const signin = async (credentials: any) => {
   const response = await axiosWithCredentials.post( `${USERS_API}/signin`, credentials );
   return response.data;
@@ -65,39 +71,27 @@ export const signout = async () => {
     const response = await axiosWithCredentials.post(`${USERS_API}/signout`);
     return response.data;
   };
-  
-// find course for signed in users
-export const findMyCourses = async () => {
-    const { data } = await axiosWithCredentials.get(`${USERS_API}/current/courses`);
-    return data;
-};
 
-// posts a new course to the server
+
+// posts a new course to the server and enroll the user
 export const createCourse = async (course: any) => {
     const { data } = await axiosWithCredentials.post(`${USERS_API}/current/courses`, course);
     return data;
 };
   
 // enroll a new course (user end)
-export const enrollCourse = async (courseId: string) => {
-  const url = `${USERS_API}/current/enrollments`;
+export const enrollIntoCourse = async (userId: string, courseId: string) => {
+  console.log("📦 Request body:", { courseId, userId });
 
-  console.log("📡 POST Request to:", url);
-  console.log("📦 Request body:", { courseId });
-
-  const response = await axiosWithCredentials.post(url, { courseId });
-  return response;
+  const response = await axiosWithCredentials.post(`${USERS_API}/${userId}/courses/${courseId}`);
+  return response.data;
 };
 
 // unenroll a course (user end)
-export const unenrollCourse = async (courseId: string) => {
-  const url = `${USERS_API}/current/enrollments`;
-  const data = { courseId };
+export const unenrollFromCourse = async (userId: string, courseId: string) => {
+  console.log("📦 Request body:", { courseId, userId });
 
-  console.log("📡 Delete Request to:", url);
-  console.log("📦 Request body:", data);
-
-  const response = await axiosWithCredentials.delete(url, {data});
-  return response;
+  const response = await axiosWithCredentials.delete(`${USERS_API}/${userId}/courses/${courseId}`);
+  return response.data;
 }
   

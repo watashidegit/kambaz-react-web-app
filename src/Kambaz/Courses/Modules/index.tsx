@@ -15,43 +15,9 @@ import * as moduleClient from "../Modules/client";
 export default function Modules() {
     const { cid } = useParams();
     const dispatch = useDispatch();
-    
-    // apply update and save
-    const saveModule = async (module: any) => {
-      await moduleClient.updateModule(module);
-      dispatch(updateModule(module));
-    };
-
-    // delete module
-    const removeModule = async (moduleId: string) => {
-      await moduleClient.deleteModule(moduleId);
-      dispatch(deleteModule(moduleId));
-    };
-
-    // create module for course 
-    const createModuleForCourse = async () => {
-      if (!cid) return;
-      const newModule = { name: moduleName, course: cid };
-      const module = await courseClient.createModuleForCourse(cid, newModule);
-      dispatch(addModule(module));
-    };
-    
-    // Fetch modules for the current course from the server and dispatch them to the Redux store
-    const fetchModules = async () => {
-      const modules = await courseClient.findModulesForCourse(cid as string);
-      dispatch(setModules(modules));
-    };
-    
-    // load modules
-    useEffect(() => {
-      fetchModules();
-    }, []);
-
+    const [moduleName, setModuleName] = useState(""); // for adding modules local state variable
     // Uses useSelector to extract the modules array from the Redux store.
     const { modules } = useSelector((state: any) => state.modulesReducer);
-
-    // for adding modules local state variable
-    const [moduleName, setModuleName] = useState("");
 
     // extract from redux to determine user roles
     const { currentUser } = useSelector((state: any) => state.accountReducer);
@@ -60,14 +26,47 @@ export default function Modules() {
     // const isStudent = currentUser?.role === "STUDENT";
     const isFaculty = currentUser?.role === "FACULTY";
     
+    // apply update and save
+    const updateModuleHandler = async (module: any) => {
+      await moduleClient.updateModule(module);
+      dispatch(updateModule(module));
+    };
+
+    // delete module
+    const deleteModuleHandler = async (moduleId: string) => {
+      await moduleClient.deleteModule(moduleId);
+      dispatch(deleteModule(moduleId));
+    };
+
+    // create module for course 
+    const addModuleHandler = async () => {
+      const newModule = await courseClient.createModuleForCourse(cid!, {
+        name: moduleName,
+        course: cid,
+      });
+      dispatch(addModule(newModule));
+      setModuleName("");
+    };
+    
+    // Fetch modules for the current course from the server and dispatch them to the Redux store
+    const fetchModulesForCourse = async () => {
+      const modules = await courseClient.findModulesForCourse(cid!);
+      dispatch(setModules(modules));
+    };
+    
+    // load modules
+    useEffect(() => {
+      fetchModulesForCourse();
+    }, [cid]);
+    
     return (
       <div>
          {/* Module Controls for Faculty Only -- add */}
         {isFaculty &&
           <ModulesControls 
-            setModuleName={setModuleName} 
+            addModule={addModuleHandler}
             moduleName={moduleName} 
-            addModule={createModuleForCourse}
+            setModuleName={setModuleName} 
         />}
         <br /><br /><br /><br />
 
@@ -80,12 +79,10 @@ export default function Modules() {
               { module.editing && (
                 <FormControl className="w-50 d-inline-block"
                     onChange={(e) => 
-                      dispatch(
-                        updateModule({ ...module, name: e.target.value }))
-                      }
+                      updateModuleHandler({ ...module, name: e.target.value }) }
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
-                        saveModule({...module, editing: false});
+                        updateModuleHandler({...module, editing: false});
                       }
                     }}
                     defaultValue={module.name}/>
@@ -93,7 +90,7 @@ export default function Modules() {
               {/* Module Control for Faculty Only -- edit /delete */}
               {isFaculty &&     
               <ModuleControlButtons moduleId={module._id}
-                deleteModule={(moduleId) => removeModule(moduleId)}
+                deleteModule={(moduleId) => deleteModuleHandler(moduleId)}
                 editModule={(moduleId) => dispatch(editModule(moduleId))}/>}
             </div>
             {module.lessons && (

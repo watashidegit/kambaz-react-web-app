@@ -3,9 +3,9 @@ import { FaCheck, FaUserCircle } from "react-icons/fa";
 import { FaPencil } from "react-icons/fa6";
 import { IoCloseSharp } from "react-icons/io5";
 import { useParams, useNavigate } from "react-router";
-import { Link } from "react-router-dom";
 import * as client from "../../Account/client";
 import { FormControl } from "react-bootstrap";
+import { useSelector } from "react-redux";
 
 export default function PeopleDetails() {
   const { uid } = useParams();
@@ -16,6 +16,8 @@ export default function PeopleDetails() {
   const [role, setRole] = useState("")
   const [editing, setEditing] = useState(false); // editing state
   const navigate = useNavigate();
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const isEditable = currentUser?.role === "ADMIN" || currentUser?.role === "FACULTY"; // only admin or faculty can edit user
 
   const saveUser = async () => {
     const [firstName, lastName] = name.split(" ");
@@ -54,10 +56,10 @@ export default function PeopleDetails() {
       
       { /* update input field */ }
       <div>
-        {!editing && (
+        {isEditable && !editing && (
           <FaPencil onClick={() => setEditing(true)}
               className="float-end fs-5 mt-2 wd-edit" /> )}
-        {editing && (
+        {isEditable && editing && (
           <FaCheck onClick={() => saveUser()}
               className="float-end fs-5 mt-2 me-2 wd-save" /> )}
         
@@ -142,11 +144,16 @@ export default function PeopleDetails() {
       <b>Section:</b>         <span className="wd-section">       {user.section}      </span> <br />
       <b>Total Activity:</b>  <span className="wd-total-activity">{user.totalActivity}</span> 
       
-      {/* delete and cancel button */}
+      {/* delete and cancel button for faculty and admin */}
       <hr />
+      { isEditable &&
+      <>
       <button onClick={() => deleteUser(uid)} className="btn btn-danger float-end wd-delete" > Delete </button>
+      
       <button onClick={() => navigate(-1)}
               className="btn btn-secondary float-start float-end me-2 wd-cancel" > Cancel </button>
+      </>}
+      
     
     </div> 
   ); }
