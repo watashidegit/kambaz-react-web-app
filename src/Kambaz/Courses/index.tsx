@@ -11,8 +11,8 @@ import { useEffect, useState } from "react";
 import Quizzes from "./Quizzes";
 import QuizEditor from "./Quizzes/editor";
 import QuizDetails from "./Quizzes/details";
-import QuizPreview from "./Quizzes/preview";
 import QuizTakePage from "./Quizzes/QuizTakePage";
+import QuizPreView from "./Quizzes/preview";
 import QuizStartConfirm from "./Quizzes/QuizStartConfirm";
 
 export default function Courses( { courses }: { courses: any[]}) {
@@ -52,7 +52,7 @@ export default function Courses( { courses }: { courses: any[]}) {
               <Route path="Quizzes/new" element={<QuizEditor />} />
               <Route path="Quizzes/:qid/editor" element={<QuizEditor />} />
               <Route path="Quizzes/:qid" element={<QuizDetails />} />
-              <Route path="/quizzes/:qid/preview" element={<QuizPreview/>}/>
+              <Route path="/quizzes/:qid/preview" element={<QuizPreView/>}/>
               <Route path="quizzes/:qid/take" element={<QuizTakePage/>}/>
               <Route path="quizzes/:qid/start" element={<QuizStartConfirm/>}/>
               <Route path="People" element={<PeopleTable users={courseUsers}/>} />
