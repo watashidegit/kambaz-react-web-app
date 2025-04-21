@@ -9,6 +9,8 @@ import { useEffect, useState } from "react";
 import ProtectedRoute from "./Account/ProtectedRoute";
 import Session from "./Account/Session";
 import { useSelector } from "react-redux";
+import QuizResultPage from "./Courses/Quizzes/QuizResultPage";
+import QuizStartConfirm from "./Courses/Quizzes/QuizStartConfirm";
 
 export default function Kambaz() {
   const [courses, setCourses] = useState<any[]>([]);
@@ -124,6 +126,8 @@ export default function Kambaz() {
             <Route path="Courses/:cid/*" element={<ProtectedRoute><Courses courses={courses} /></ProtectedRoute>} />
             <Route path="/Calendar" element={<h1>Calendar</h1>} />
             <Route path="/Inbox" element={<h1>Inbox</h1>} />
+            <Route path="quizzes/:qid/result" element={<QuizResultPage/>}/>
+            <Route path="quizzes/:qid/confirm" element={<QuizStartConfirm/>}/>
           </Routes>
         </div>
       </div>

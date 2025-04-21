@@ -46,7 +46,7 @@ export const findAssignmentsForCourse = async (courseId: string) => {
 
 // create an assignment for a given course
 export const createAssignmentForCourse = async (courseId: string, assignment: any) => {
-    const response = await axios.post(
+    const response = await axiosWithCredentials.post(
         `${COURSES_API}/${courseId}/assignments`, assignment
     );
     return response.data;
@@ -54,7 +54,30 @@ export const createAssignmentForCourse = async (courseId: string, assignment: an
 
 // retrieve users for a given course
 export const findUsersForCourse = async (courseId: string) => {
-    const response = await axios.get(`${COURSES_API}/${courseId}/users`);
+    const response = await axiosWithCredentials.get(`${COURSES_API}/${courseId}/users`);
+    return response.data;
+};
+
+// retrieve quizzes for a given course
+export const findQuizzesForCourse = async (courseId: string) => {
+    const response = await axiosWithCredentials.get(`${COURSES_API}/${courseId}/quizzes`);
+    return response.data;
+}
+
+// retrieve quizzes for a given course by partial title
+export const findQuizzesByPartialTitle = async (courseId: string, partialTitle: string) => {
+    const response = await axiosWithCredentials.get(`${COURSES_API}/${courseId}/quizzes`, {
+        params: { title: partialTitle }
+    });
     return response.data;
 };
    
+// create a quiz for a given course
+export const createQuizForCourse = async (courseId: string, quiz: any) => {
+    const response = await axiosWithCredentials.post(
+        `${COURSES_API}/${courseId}/quizzes`, quiz
+    );
+    console.log(courseId, quiz);
+    return response.data;
+};
+

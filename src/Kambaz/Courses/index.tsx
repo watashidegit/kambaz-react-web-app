@@ -8,6 +8,12 @@ import { FaAlignJustify } from "react-icons/fa";
 import PeopleTable from "./People/Table";
 import * as CourseClient from "../Courses/client"
 import { useEffect, useState } from "react";
+import Quizzes from "./Quizzes";
+import QuizEditor from "./Quizzes/editor";
+import QuizDetails from "./Quizzes/details";
+import QuizPreview from "./Quizzes/preview";
+import QuizTakePage from "./Quizzes/QuizTakePage";
+import QuizStartConfirm from "./Quizzes/QuizStartConfirm";
 
 export default function Courses( { courses }: { courses: any[]}) {
     
@@ -16,13 +22,15 @@ export default function Courses( { courses }: { courses: any[]}) {
     const { pathname } = useLocation();
     const [courseUsers, setCourseUsers] = useState<any[]>([]);
 
+
     const fetchUsersInCourse = async (cid: string) => {
       const users = await CourseClient.findUsersForCourse(cid);
       setCourseUsers(users);
     }
+
     useEffect(() => {
       if (cid) fetchUsersInCourse(cid);
-    }, [cid])
+    }, [cid]);
    
     return (
       <div id="wd-courses">        
@@ -40,7 +48,14 @@ export default function Courses( { courses }: { courses: any[]}) {
               <Route path="Modules" element={<Modules />} />
               <Route path="Assignments" element={<Assignments />} />
               <Route path="Assignments/:aid" element={<AssignmentEditor />} />
-              <Route path="People" element={<PeopleTable users={courseUsers} />} />
+              <Route path="Quizzes" element={<Quizzes />} />
+              <Route path="Quizzes/new" element={<QuizEditor />} />
+              <Route path="Quizzes/:qid/editor" element={<QuizEditor />} />
+              <Route path="Quizzes/:qid" element={<QuizDetails />} />
+              <Route path="/quizzes/:qid/preview" element={<QuizPreview/>}/>
+              <Route path="quizzes/:qid/take" element={<QuizTakePage/>}/>
+              <Route path="quizzes/:qid/start" element={<QuizStartConfirm/>}/>
+              <Route path="People" element={<PeopleTable users={courseUsers}/>} />
             </Routes>
           </div>
         </div>
