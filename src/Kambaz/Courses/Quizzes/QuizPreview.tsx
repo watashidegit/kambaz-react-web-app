@@ -5,7 +5,7 @@ import * as quizClient from "./client";
 import { QuizType, QuizAttempt } from "./types";
 import { useSelector } from "react-redux";
 
-export default function preview() {
+export default function QuizPreview() {
     const { cid, qid } = useParams();
     const navigate = useNavigate();
     const [quiz, setQuiz] = useState<QuizType | null>(null);

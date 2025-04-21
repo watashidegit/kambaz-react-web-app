@@ -12,7 +12,7 @@ import Quizzes from "./Quizzes";
 import QuizEditor from "./Quizzes/editor";
 import QuizDetails from "./Quizzes/details";
 import QuizTakePage from "./Quizzes/QuizTakePage";
-import QuizPreView from "./Quizzes/preview";
+import QuizPreView from "./Quizzes/QuizPreview";
 import QuizStartConfirm from "./Quizzes/QuizStartConfirm";
 
 export default function Courses( { courses }: { courses: any[]}) {
