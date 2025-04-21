@@ -78,12 +78,12 @@ export default function QuizResultPage() {
             case "True/False":
                 return userAnswer === question.answer;
             case "Fill in the Blank":
-                if (question.choices) {
-                    return question.choices.some((choice: string) => {
+                if (Array.isArray(question.correctAnswers)) {
+                    return question.correctAnswers.some((ans: string) => {
                         if (question.caseSensitive) {
-                            return userAnswer === choice;
+                            return userAnswer === ans;
                         } else {
-                            return userAnswer.toLowerCase() === choice.toLowerCase();
+                            return userAnswer.toLowerCase() === ans.toLowerCase();
                         }
                     });
                 }
@@ -98,10 +98,10 @@ export default function QuizResultPage() {
 
         switch (question.type) {
             case "Multiple Choice": {
-                const choiceIndex = parseInt(userAnswer);
-                return question.choices && question.choices[choiceIndex]
-                    ? question.choices[choiceIndex]
-                    : "Invalid choice";
+                const optionIndex = parseInt(userAnswer);
+                return question.options && question.options[optionIndex]
+                    ? question.options[optionIndex]
+                    : "Invalid option";
             }
             case "True/False":
             case "Fill in the Blank":
@@ -115,47 +115,44 @@ export default function QuizResultPage() {
         if (!question) return "Not specified (no question data)";
 
         let correctIndex;
-        let choices;
+        let options;
 
         switch (question.type) {
             case "Multiple Choice":
                 console.debug("Multiple Choice Debug:", {
-                    choices: question.choices,
+                    options: question.options,
                     correctAnswer: question.correctAnswer,
                     typeOfCorrectAnswer: typeof question.correctAnswer
                 });
 
-                choices = question.choices;
+                options = question.options;
                 correctIndex = Number(question.correctAnswer);
 
-                if (!Array.isArray(choices)) {
+                if (!Array.isArray(options)) {
                     return "Not specified (invalid choices format)";
                 }
-                if (choices.length === 0) {
+                if (options.length === 0) {
                     return "Not specified (no choices available)";
                 }
 
                 if (isNaN(correctIndex)) {
                     return "Not specified (invalid correct answer index)";
                 }
-                if (correctIndex < 0 || correctIndex >= choices.length) {
+                if (correctIndex < 0 || correctIndex >= options.length) {
                     return `Not specified (index ${correctIndex} out of range)`;
                 }
 
-                return choices[correctIndex];
+                return options[correctIndex];
 
             case "True/False":
-                return (question.answer === "True" || question.answer === "False")
-                    ? question.answer
+                return (question.correctAnswer === "True" || question.correctAnswer === "False")
+                    ? question.correctAnswer
                     : "Not specified (invalid True/False answer)";
 
             case "Fill in the Blank":
-                return (Array.isArray(question.choices) && question.choices.length > 0)
-                    ? question.choices.join(" or ")
+                return (Array.isArray(question.correctAnswers) && question.correctAnswers.length > 0)
+                    ? question.correctAnswers.join(" / ")
                     : "Not specified (no possible answers)";
-
-            case "Short Answer":
-                return question.answer || "Not specified";
 
             default:
                 return "Not specified (unknown question type)";

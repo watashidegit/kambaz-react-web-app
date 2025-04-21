@@ -14,6 +14,7 @@ import QuizDetails from "./Quizzes/details";
 import QuizTakePage from "./Quizzes/QuizTakePage";
 import QuizPreView from "./Quizzes/QuizPreview";
 import QuizStartConfirm from "./Quizzes/QuizStartConfirm";
+import QuizResultPage from "./Quizzes/QuizResultPage";
 
 export default function Courses( { courses }: { courses: any[]}) {
     
@@ -55,6 +56,7 @@ export default function Courses( { courses }: { courses: any[]}) {
               <Route path="/quizzes/:qid/preview" element={<QuizPreView/>}/>
               <Route path="quizzes/:qid/take" element={<QuizTakePage/>}/>
               <Route path="quizzes/:qid/start" element={<QuizStartConfirm/>}/>
+              <Route path="quizzes/:qid/result" element={<QuizResultPage/>}/>
               <Route path="People" element={<PeopleTable users={courseUsers}/>} />
             </Routes>
           </div>

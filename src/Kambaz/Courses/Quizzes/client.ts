@@ -35,14 +35,12 @@ export const fetchPreviewAttempt = async (quizId: string, userId: string) => {
         );
         return data;
     } catch (error) {
-        // eslint-disable-next-line
         const err = error as { response?: { data: any }, message?: string };
         console.error("Error fetching preview attempt:", err.response ? err.response.data : err.message);
         throw error;
     }
 };
 
-// eslint-disable-next-line
 export const savePreviewAttempt = async (quizId: string, attempt: any) => {
     const { data } = await axiosWithCredentials.post(
         `${QUIZZES_API}/${quizId}/preview`,
