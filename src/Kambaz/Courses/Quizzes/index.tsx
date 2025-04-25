@@ -231,7 +231,7 @@ export default function Quizzes() {
                                             {" | "}
                                             {quiz.points} pts
                                             {" | "}
-                                            {quiz.questionsCount} Questions
+                                            {quiz.questions.length} Questions
                                             {isStudent && (
                                                 <> | Score: {getStudentScore(quiz._id)}</>
                                             )}
