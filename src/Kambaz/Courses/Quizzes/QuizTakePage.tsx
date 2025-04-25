@@ -163,7 +163,6 @@ export default function QuizTakePage() {
         }
     }, [quiz, remainingAttempts, handleSubmit]);
 
-    // eslint-disable-next-line
     const handleChange = (questionId: string, value: any) => {
         console.log("Updating answer for question:", questionId, "Value:", value);
         setAnswers((prev) => ({ ...prev, [questionId]: value }));

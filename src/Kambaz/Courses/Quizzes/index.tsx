@@ -13,6 +13,8 @@ import * as courseClient from "../client";
 import * as quizClient from "./client";
 import { setQuizzes } from "./reducer";
 import { useEffect, useState } from "react";
+import { QuizType, QuizAttempt } from "./types";
+
 
 
 export default function Quizzes() {
@@ -25,6 +27,10 @@ export default function Quizzes() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedQuiz, setSelectedQuiz] = useState<any>(null);
     const [filteredQuizzes, setFilteredQuizzes] = useState<any[]>([]);
+    const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
+    const [showMaxAttemptModal, setShowMaxAttemptModal] = useState(false);
+    const [viewingQuizId, setViewingQuizId] = useState<string | null>(null);
+
     const formatDateTime = (isoDate: string | undefined) => {
         if (!isoDate) return "—";
     
@@ -44,12 +50,6 @@ export default function Quizzes() {
       
         return `${datePart} at ${timePart}`;
       };
-
-    const fetchQuizzes = async() => {
-        const quizzes = await courseClient.findQuizzesForCourse(cid as string);
-        console.log(quizzes);
-        dispatch(setQuizzes(quizzes));
-    }
     
     const quizzes = useSelector((state: any) => state.quizReducer.quizzes);
     
@@ -61,6 +61,26 @@ export default function Quizzes() {
             setFilteredQuizzes(quizzes)}
     }
 
+    const getStudentScore = (quizId: string) => {
+        if (!currentUser?._id) return "Not Attempted";
+      
+        const quizAttempts = attempts.filter(attempt => attempt.quizId === quizId);
+        if (quizAttempts.length === 0) return "Not Attempted";
+      
+        const latestAttempt = quizAttempts.reduce((latest, attempt) =>
+          new Date(attempt.submittedAt) > new Date(latest.submittedAt) ? attempt : latest
+        );
+      
+        const quiz = quizzes.find((q: QuizType) => q._id === quizId);
+        if (!quiz) return "N/A";
+      
+        const totalPoints = quiz.questions.reduce((sum: number, q: any) => sum + q.points, 0);
+        if (totalPoints === 0) return "N/A";
+      
+        const percentage = (latestAttempt.score / totalPoints) * 100;
+        return `${percentage.toFixed(0)}%`;
+      };
+
     // search filter to map quizzes
     const displayedQuizzes = filteredQuizzes.length>0 ? filteredQuizzes : quizzes;
     
@@ -68,10 +88,32 @@ export default function Quizzes() {
     const visibleQuizzes = isStudent
         ? displayedQuizzes.filter((quiz: any) => quiz.published) : displayedQuizzes;
 
-    useEffect(()=> {
+    const fetchQuizzes = async() => {
+        const quizzes = await courseClient.findQuizzesForCourse(cid as string);
+        console.log(quizzes);
+        dispatch(setQuizzes(quizzes));
+    }
+
+    useEffect(() => {
+        const loadAttempts = async () => {
+            if (currentUser?._id && currentUser.role === "STUDENT" && quizzes.length > 0) {
+                try {
+                    const allAttempts = await Promise.all(
+                        quizzes.map((quiz:QuizType) => {
+                            if (!quiz._id) return Promise.resolve([]);
+                            return quizClient.fetchStudentQuizAttempts(quiz._id, currentUser._id).catch(() => []);
+                        })
+                    );
+                    setAttempts(allAttempts.flat());
+                } catch (error) {
+                    console.error("Failed to load attempts", error);
+                }
+            }
+        };
+
+        loadAttempts();
         fetchQuizzes();
-    }, [cid]
-    );
+    }, [quizzes, currentUser]);
 
     const handleDeleteClick = (quiz: any) => {
         setSelectedQuiz(quiz);
@@ -154,11 +196,23 @@ export default function Quizzes() {
                                     <div className="flex-grow-1 text-start">
                                         <div
                                             className="fw-bold fs-5 cursor-pointer"
-                                            onClick={() =>
-                                                isStudent
-                                                    ? navigate(`/Kambaz/Courses/${cid}/quizzes/${quiz._id}/start`)
-                                                    : navigate(`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`)
-                                            }
+                                            onClick={() => {
+                                                if (isStudent) {
+                                                  const quizAttempts = attempts.filter((a) => a.quizId === quiz._id);
+                                                  const remainingAttempts = quiz.attempts - quizAttempts.length;
+                                              
+                                                  if (remainingAttempts <= 0) {
+                                                    setViewingQuizId(quiz._id);
+                                                    setShowMaxAttemptModal(true);
+                                                    return;
+                                                  }
+                                              
+                                                  navigate(`/Kambaz/Courses/${cid}/quizzes/${quiz._id}/start`);
+                                                } else {
+                                                  navigate(`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`);
+                                                }
+                                              }}
+                                              
                                         >
                                             {quiz.title}
                                         </div>
@@ -178,7 +232,9 @@ export default function Quizzes() {
                                             {quiz.points} pts
                                             {" | "}
                                             {quiz.questionsCount} Questions
-                                            {isStudent && quiz.score !== null && <> | Score: {quiz.score}</>}
+                                            {isStudent && (
+                                                <> | Score: {getStudentScore(quiz._id)}</>
+                                            )}
                                         </div>
                                     </div>
                                     
@@ -215,6 +271,36 @@ export default function Quizzes() {
                     </ListGroup>
                 </ListGroup>
 
+                {showMaxAttemptModal && (
+                    <Modal
+                        show={showMaxAttemptModal}
+                        onHide={() => setShowMaxAttemptModal(false)}
+                        centered
+                    >
+                        <Modal.Header closeButton>
+                        <Modal.Title>Maximum Attempts Reached</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                        <p>You have used all available attempts for this quiz.</p>
+                        </Modal.Body>
+                        <Modal.Footer>
+                        <Button variant="secondary" onClick={() => setShowMaxAttemptModal(false)}>
+                            Close
+                        </Button>
+                        <Button
+                            variant="primary"
+                            onClick={() => {
+                            navigate(`/Kambaz/Courses/${cid}/quizzes/${viewingQuizId}/result`);
+                            setShowMaxAttemptModal(false);
+                            }}
+                        >
+                            View Results
+                        </Button>
+                        </Modal.Footer>
+                    </Modal>
+                    )}
+
+
                 <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
                     <Modal.Header closeButton>
                         <Modal.Title>Confirm Delete</Modal.Title>
@@ -229,6 +315,7 @@ export default function Quizzes() {
                         </Button>
                     </Modal.Footer>
                 </Modal>
+                
         </div>
     );
 }
