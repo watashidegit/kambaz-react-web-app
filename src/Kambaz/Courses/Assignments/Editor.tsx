@@ -1,144 +1,212 @@
-import { Form, Button, Card, Row, Col, InputGroup } from "react-bootstrap";
-import { FaCalendarAlt } from "react-icons/fa";
+import { useParams, useNavigate, Navigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
+import { useState, useEffect } from "react";
+import { addAssignment, updateAssignment } from "./reducer";
+import * as courseClient from "../client"; 
+import * as assignmentClient from "./client";
+
 export default function AssignmentEditor() {
+    const { cid, aid } = useParams();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    // extract assignments of the course from redux
+    const assignments = useSelector((state: any) => state.assignmentReducer.assignments);
+
+    // check if the assignment exist, go to add/edit mode
+    const assignment = assignments.find((assignment: any) => assignment._id === aid);
+
+    const { currentUser } = useSelector((state: any) => state.accountReducer);
+
+    // create assignment for the course
+    const createAssignmentForCourse = async () => {
+        if (!cid) return;
+        const newAssignment = { title: formData.title, course: cid}
+        const assignment = await courseClient.createAssignmentForCourse(cid, newAssignment);
+        dispatch(addAssignment(assignment));
+    }
+
+    // save update
+    const saveAssignmentUpdate = async (assignment: any) => {
+        await assignmentClient.updateAssignment(assignment);
+        dispatch(updateAssignment(assignment));
+    }
+
+    // initial state of the form (form to create new assignment)
+    const [formData, setFormData] = useState({
+        _id: "",
+        title: "",
+        description: "",
+        points: 100,
+        assignmentGroup: "ASSIGNMENTS",
+        displayGrade: "Percentage",
+        submissionType: "Online",
+        assignTo: "Everyone",
+        dueDate: "",
+        availableFromDate: "",
+        availableUntilDate: "",
+    });
+
+    useEffect(() => {
+        if (assignment) {
+            setFormData({
+                _id: assignment._id || "",
+                title: assignment.title || "",
+                description: assignment.description ?? `This is the description for ${assignment.title}`,
+                points: assignment.points || 100,
+                assignmentGroup: assignment.assignmentGroup || "ASSIGNMENTS",
+                displayGrade: assignment.displayGrade || "Percentage",
+                submissionType: assignment.submissionType || "Online",
+                assignTo: assignment.assignTo || "Everyone",
+                dueDate: assignment.dueDate || "",
+                availableFromDate: assignment.availableFromDate || "",
+                availableUntilDate: assignment.availableUntilDate || "",
+            });
+        }
+    }, [assignment]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSave = () => {
+        const updatedAssignment = {
+            _id: assignment?._id,
+            title: formData.title,
+            course: cid,
+            description: formData.description,
+            points: formData.points,
+            dueDate: formData.dueDate,
+            availableFromDate: formData.availableFromDate,
+            availableUntilDate: formData.availableUntilDate,
+            assignmentGroup: formData.assignmentGroup,
+            displayGrade: formData.displayGrade,
+            submissionType: formData.submissionType,
+            assignTo: formData.assignTo,
+        };
+
+        if (assignment) {
+            saveAssignmentUpdate(updatedAssignment);
+        } else {
+            createAssignmentForCourse();
+        }
+        navigate(`/Kambaz/Courses/${cid}/Assignments`);
+    };
+
+    if (!currentUser || currentUser.role !== "FACULTY") {
+        return <Navigate to={`/Kambaz/Courses/${cid}/Assignments`} />;
+    }
+
     return (
-        <div style={{ width:"700px", margin: "0 auto" }} id="wd-assignments-editor">
-            <div className="container mt-4">
-                <Form>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Assignment Name</Form.Label>
-                        <Form.Control type="text" placeholder="A1" />
-                    </Form.Group>
+        <Container className="mt-4">
+            <Form>
+                <Form.Group className="mb-3">
+                    <Form.Label className="d-block text-left">Assignment Name</Form.Label>
+                    <Form.Control
+                        type="text"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        className="w-100"
+                    />
+                </Form.Group>
 
-                    <Card id="wd-description" className="mb-4">
-                        <Card.Body>
-                            <p>
-                                The assignment is <span className="text-danger">available online</span>
-                            </p>
-                            <p>
-                                Submit a link to the landing page of your Web application running on 
-                                Netlify.
-                            </p>
-                            <p>The landing page should include the following:</p>
-                            <ul>
-                                <li>Your full name and section</li>
-                                <li>Links to each of the lab assignments</li>
-                                <li>Link to the Kambaz application
-                                </li>
-                                <li>Links to all relevant source code repositories</li>
-                            </ul>
-                            <p>
-                                The Kambaz application should include a link to navigate back to the landing page.
-                            </p>
+                <Form.Group className="mb-3">
+                    <Card>
+                        <Card.Body className="p-0">
+                            <Form.Control
+                                as="textarea"
+                                name="description"
+                                value={formData.description}
+                                onChange={handleChange}
+                                className="h-100 w-100 border-0"
+                                style={{ minHeight: "200px" }}
+                            />
                         </Card.Body>
                     </Card>
+                </Form.Group>
 
-                    <Form.Group className="d-flex mb-3 align-items-center">
-                        <Form.Label className="me-2 mb-0">Points</Form.Label>
-                        <Form.Control type="number" placeholder="100" />
-                    </Form.Group>
+                <Row className="mb-3">
+                    <Col sm={3} className="text-end">
+                        <Form.Label>Points</Form.Label>
+                    </Col>
+                    <Col sm={9}>
+                        <Form.Control
+                            type="number"
+                            name="points"
+                            value={formData.points}
+                            onChange={handleChange}
+                            className="w-50 ms-auto"
+                        />
+                    </Col>
+                </Row>
 
-                    <Form.Group className="d-flex mb-3 align-items-center">
-                        <Form.Label className="me-2 mb-0" style={{ whiteSpace: "nowrap" }} >Assignment Group</Form.Label>
-                        <Form.Select>
-                            <option value="ASSIGNMENTS">ASSIGNMENTS</option>
+                <Row className="mb-3">
+                    <Col sm={3} className="text-end">
+                        <Form.Label>Assignment Group</Form.Label>
+                    </Col>
+                    <Col sm={9}>
+                        <Form.Select
+                            className="w-50 ms-auto"
+                            name="assignmentGroup"
+                            value={formData.assignmentGroup}
+                            onChange={handleChange}
+                        >
+                            <option>ASSIGNMENTS</option>
+                            <option>QUIZZES</option>
+                            <option>PROJECTS</option>
                         </Form.Select>
-                    </Form.Group>
+                    </Col>
+                </Row>
 
-                    <Form.Group className="d-flex mb-3 align-items-center">
-                        <Form.Label className="me-2 mb-0" style={{ whiteSpace: "nowrap" }} >Display Grade as</Form.Label>
-                        <Form.Select>
-                            <option value="Percentage">Percentage</option>
+                <Row className="mb-3">
+                    <Col sm={3} className="text-end">
+                        <Form.Label>Display Grade as</Form.Label>
+                    </Col>
+                    <Col sm={9}>
+                        <Form.Select
+                            className="w-50 ms-auto"
+                            name="displayGrade"
+                            value={formData.displayGrade}
+                            onChange={handleChange}
+                        >
+                            <option>Percentage</option>
+                            <option>Complete/Incomplete</option>
+                            <option>Points</option>
                         </Form.Select>
-                    </Form.Group>
+                    </Col>
+                </Row>
 
-                    <Form.Label className= "d-flex mb-3 align-items-center"> Submission Type
-                    <Card className="flex-grow-1 ms-3">
-                        <Card.Body>
-                            <Form.Group className="me-2 mb-3">
-                                <Form.Select>
-                                    <option value="Online">Online</option>
-                                </Form.Select>
-                            </Form.Group>
+                <Row className="mb-3">
+                    <Col sm={3} className="text-end">
+                        <Form.Label>Due Date</Form.Label>
+                    </Col>
+                    <Col sm={9}>
+                        <Form.Control
+                            type="date"
+                            name="dueDate"
+                            value={formData.dueDate}
+                            onChange={handleChange}
+                            className="w-50 ms-auto"
+                        />
+                    </Col>
+                </Row>
 
-                            <p className="fw-bold text-muted">Online Entry Options</p>
-                            <Form.Check type="checkbox" label="Text Entry" />
-                            <Form.Check type="checkbox" label="Website URL" defaultChecked />
-                            <Form.Check type="checkbox" label="Media Recordings" />
-                            <Form.Check type="checkbox" label="Student Annotation" />
-                            <Form.Check type="checkbox" label="File Uploads" />
-                        </Card.Body>
-                    </Card>
-                    </Form.Label>
-
-                    <Card className="mb-4">
-                        <Card.Body>
-                            <Form.Group className="mb-3">
-                                <Form.Label className="fw-bold text-muted">Assign to</Form.Label>
-                                <Form.Control type="text" placeholder="Everyone" />
-                            </Form.Group>
-
-                            <Row>
-                                <Col md={6}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label className="fw-bold text-muted">Due</Form.Label>
-                                        <InputGroup>
-                                            <Form.Control
-                                                type="datetime-local"
-                                                defaultValue="2024-05-13T23:59"
-                                                aria-label="Due Date"
-                                            />
-                                            <InputGroup.Text>
-                                                <FaCalendarAlt />
-                                            </InputGroup.Text>
-                                        </InputGroup>
-                                    </Form.Group>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col md={6}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label className="fw-bold text-muted">Available from</Form.Label>
-                                        <InputGroup>
-                                            <Form.Control
-                                                type="datetime-local"
-                                                defaultValue="2024-05-06T00:00"
-                                                aria-label="Available from"
-                                            />
-                                            <InputGroup.Text>
-                                                <FaCalendarAlt />
-                                            </InputGroup.Text>
-                                        </InputGroup>
-                                    </Form.Group>
-                                </Col>
-                            
-                                <Col md={6}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label className="fw-bold text-muted">Until</Form.Label>
-                                        <InputGroup>
-                                            <Form.Control
-                                                type="datetime-local"
-                                                defaultValue="2024-05-13T23:59"
-                                                aria-label="Due Date"
-                                            />
-                                            <InputGroup.Text>
-                                                <FaCalendarAlt />
-                                            </InputGroup.Text>
-                                        </InputGroup>
-                                    </Form.Group>
-                                </Col>
-                            </Row>
-                        </Card.Body>
-                    </Card>
-
-                    <div className="d-flex justify-content-end">
-                        <Button variant="secondary" className="me-2">
-                            Cancel
-                        </Button>
-                        <Button variant="danger">Save</Button>
-                    </div>
-                </Form>
-            </div>  
-        </div>
+                <div className="d-flex justify-content-end">
+                    <Button
+                        variant="secondary"
+                        className="me-2"
+                        onClick={() => navigate(`/Kambaz/Courses/${cid}/Assignments`)}
+                    >
+                        Cancel
+                    </Button>
+                    <Button variant="danger" onClick={handleSave}>
+                        Save
+                    </Button>
+                </div>
+            </Form>
+        </Container>
     );
 }
